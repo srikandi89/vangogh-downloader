@@ -1,5 +1,8 @@
 package com.vangogh.downloader;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -7,6 +10,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 
 public class DocumentDownloader extends DownloadManager {
+    private Handler handler;
     private static final int BYTE_SIZE = 1024;
     private static final int DEFAULT_MAX_THREAD = 10;
     private static final int DEFAULT_MAX_TOTAL_BYTE = 500*BYTE_SIZE;
@@ -39,26 +43,39 @@ public class DocumentDownloader extends DownloadManager {
 
             @Override
             public void onFinished(byte[] data, String encodedUrl) {
-                String rawResponse = new String(data);
+                final String rawResponse = new String(data);
 
-                try {
-                    if (rawResponse.startsWith("[")) {
-                        JSONArray jsonArray = new JSONArray(rawResponse);
-                        response.onSuccess(rawResponse, jsonArray);
-                    }
-                    else {
-                        JSONObject jsonObject = new JSONObject(rawResponse);
-                        response.onSuccess(rawResponse, jsonObject);
-                    }
+                handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            if (rawResponse.startsWith("[")) {
+                                JSONArray jsonArray = new JSONArray(rawResponse);
+                                response.onSuccess(rawResponse, jsonArray);
+                            }
+                            else {
+                                JSONObject jsonObject = new JSONObject(rawResponse);
+                                response.onSuccess(rawResponse, jsonObject);
+                            }
 
-                } catch (JSONException e) {
-                    response.onFailed(e);
-                }
+                        } catch (JSONException e) {
+                            response.onFailed(e);
+                        }
+                    }
+                });
+
             }
 
             @Override
-            public void onFailed(IOException e) {
-                response.onFailed(e);
+            public void onFailed(final IOException e) {
+                handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        response.onFailed(e);
+                    }
+                });
             }
 
             @Override
