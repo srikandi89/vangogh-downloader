@@ -1,7 +1,5 @@
 package com.vangogh.downloader;
 
-import android.util.Log;
-
 import com.vangogh.downloader.utilities.StringUtils;
 
 import java.io.*;
@@ -50,8 +48,6 @@ public class Downloader extends Thread {
 
             while ((bytesRead = inputStream.read(buffer, 0, BUFFER_SIZE)) != -1 && running) {
                 bos.write(buffer, 0, bytesRead);
-                Log.d(Downloader.class.getSimpleName(), "Is Running ? "+running);
-
             }
 
             byte[] data = bos.toByteArray();

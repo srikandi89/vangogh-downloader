@@ -44,7 +44,6 @@ public class ImageDownloader extends DownloadManager {
         download(url, new Downloader.ResultCallback() {
             @Override
             public void onStarted(Downloader downloader, final String encodedUrl) {
-                // TODO : Do something before download finished
                 boolean equal = StringUtils.toMD5(downloader.getUrl()).equals(encodedUrl);
 
                 // Read from cache if exist
@@ -76,8 +75,6 @@ public class ImageDownloader extends DownloadManager {
 
                         if (downloaders.get(encodedUrl) != null) {
                             downloaders.remove(encodedUrl);
-
-                            Log.d(ImageDownloader.class.getSimpleName(), "Removing "+encodedUrl+" from worker pool");
                         }
 
                         if (downloaderQueue.size() > 0) {
@@ -90,12 +87,12 @@ public class ImageDownloader extends DownloadManager {
 
             @Override
             public void onFailed(IOException e) {
-                Log.d(ImageDownloader.class.getSimpleName(), e.getMessage());
+                Log.e(ImageDownloader.class.getSimpleName(), e.getMessage());
             }
 
             @Override
             public void onStopped(String encodedUrl) {
-                Log.d(ImageDownloader.class.getSimpleName(), "Thread "+encodedUrl+" just stopped :D");
+                Log.i(ImageDownloader.class.getSimpleName(), "Thread "+encodedUrl+" just stopped");
             }
         });
     }
@@ -105,9 +102,7 @@ public class ImageDownloader extends DownloadManager {
         download(url, new Downloader.ResultCallback() {
             @Override
             public void onStarted(Downloader downloader, final String encodedUrl) {
-                // TODO : Do something before download finished
                 boolean equal = StringUtils.toMD5(downloader.getUrl()).equals(encodedUrl);
-                Log.d(ImageDownloader.class.getSimpleName(), encodedUrl+" starting to download image from: "+downloader.getUrl()+", "+equal);
 
                 // Read from cache if exist
                 if (cachedData.get(encodedUrl) != null) {

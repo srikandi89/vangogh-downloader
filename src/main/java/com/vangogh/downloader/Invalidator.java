@@ -53,8 +53,6 @@ public class Invalidator extends Thread {
     private void invalidate(DownloadManager manager) {
         ConcurrentHashMap<String, Date> timeCached = manager.getTimeCachedData();
 
-        Log.d(Invalidator.class.getSimpleName(), "Invalidator lifetime :"+lifeTimeMillis);
-
         for (Map.Entry<String, Date> entry : timeCached.entrySet()) {
             Date date = entry.getValue();
             String key = entry.getKey();
@@ -62,7 +60,6 @@ public class Invalidator extends Thread {
             long timeDiff = TimeUtils.timeDiffMillis(date, new Date());
 
             if (timeDiff > LIFE_TIME_MILLIS) {
-                Log.d(Invalidator.class.getSimpleName(), "Remove data for "+key+" cache document");
                 manager.getCachedData().remove(key);
             }
         }
