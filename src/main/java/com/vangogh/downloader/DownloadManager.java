@@ -47,6 +47,12 @@ public abstract class DownloadManager {
         }
     }
 
+    /**
+     * As long total cache data less than max allowed cached bytes data
+     * put another bytes of data into the cache
+     * @param key
+     * @param data
+     */
     protected void cacheByteData(String key, byte[] data) {
         if(getTotalCachedDataSize() <= maxTotalBytes) {
             cachedData.put(key, data);

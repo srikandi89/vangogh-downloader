@@ -97,6 +97,18 @@ public class ImageDownloader extends DownloadManager {
         });
     }
 
+    /**
+     * Directly display the downloaded data into ImageView
+     * Convert byte of data into Bitmap and display it into ImageView
+     * Have additional listener to control what we need to do when met these conditions:
+     * - On Download Started
+     * - On Download Finished
+     * - On Download Stopped
+     * - On Download Finished
+     * @param url
+     * @param view
+     * @param listener
+     */
     public void toImageView(String url, final ImageView view, final OnDownloadListener listener) {
 
         download(url, new Downloader.ResultCallback() {
