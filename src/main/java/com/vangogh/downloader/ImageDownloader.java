@@ -46,7 +46,6 @@ public class ImageDownloader extends DownloadManager {
             public void onStarted(Downloader downloader, final String encodedUrl) {
                 // TODO : Do something before download finished
                 boolean equal = StringUtils.toMD5(downloader.getUrl()).equals(encodedUrl);
-                Log.d(ImageDownloader.class.getSimpleName(), encodedUrl+" starting to download image from: "+downloader.getUrl()+", "+equal);
 
                 // Read from cache if exist
                 if (cachedData.get(encodedUrl) != null) {
@@ -101,11 +100,92 @@ public class ImageDownloader extends DownloadManager {
         });
     }
 
+    public void toImageView(String url, final ImageView view, final OnDownloadListener listener) {
+
+        download(url, new Downloader.ResultCallback() {
+            @Override
+            public void onStarted(Downloader downloader, final String encodedUrl) {
+                // TODO : Do something before download finished
+                boolean equal = StringUtils.toMD5(downloader.getUrl()).equals(encodedUrl);
+                Log.d(ImageDownloader.class.getSimpleName(), encodedUrl+" starting to download image from: "+downloader.getUrl()+", "+equal);
+
+                // Read from cache if exist
+                if (cachedData.get(encodedUrl) != null) {
+                    handler = new Handler(Looper.getMainLooper());
+                    handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] data = cachedData.get(encodedUrl);
+                            listener.onDownloadStarted();
+                            ImageUtils.setImage(data, view);
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onFinished(final byte[] data, final String encodedUrl) {
+                handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        // Re-render with the newest one
+                        listener.onDownloadFinished();
+                        ImageUtils.setImage(data, view);
+
+                        // Cache data if this byte never been cached
+                        if (cachedData.get(encodedUrl) == null) {
+                            cacheByteData(encodedUrl, data);
+                        }
+
+                        if (downloaders.get(encodedUrl) != null) {
+                            downloaders.remove(encodedUrl);
+                        }
+
+                        if (downloaderQueue.size() > 0) {
+                            Downloader fromQueue = downloaderQueue.pop();
+                            downloaders.put(encodedUrl, fromQueue);
+                        }
+                    }
+                });
+            }
+
+            @Override
+            public void onFailed(IOException e) {
+                handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onDownloadFailed();
+                    }
+                });
+            }
+
+            @Override
+            public void onStopped(String encodedUrl) {
+                handler = new Handler(Looper.getMainLooper());
+                handler.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        listener.onDownloadStopped();
+                    }
+                });
+            }
+        });
+    }
+
     public int getMaxThread() {
         return this.maxThread;
     }
 
     public int getMaxTotalBytes() {
         return this.maxTotalBytes;
+    }
+
+    public interface OnDownloadListener {
+        void onDownloadFinished();
+        void onDownloadStarted();
+        void onDownloadStopped();
+        void onDownloadFailed();
     }
 }
