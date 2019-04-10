@@ -1,6 +1,7 @@
 In your AndroidManifest.xml, set android:usesCleartextTraffic="true"
 
 Example:
+```xml
 <application
     android:name=".MyApplication"
     android:allowBackup="true"
@@ -18,3 +19,4 @@ Example:
         </intent-filter>
     </activity>
 </application>
+```
